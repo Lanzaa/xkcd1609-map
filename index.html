@@ -1,0 +1,111 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+  <head>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="leaflet.css" />
+    <script src="leaflet.js"></script>
+    <script src="coinlist.js"></script>
+    <title>XKCD #1608 - Click and Drag - Zoomable Map</title>
+    <meta name="description" content="Explore xkcd 1608 Webcomic in a Google Maps like interface."/>
+    <style type="text/css">
+        #social {
+          position:absolute;bottom:65px;right:0px;z-index:10000px;
+        }
+        #corner {
+          position:absolute;bottom:0px;right:0px;z-index:10000px;
+          font-family: Arial;
+          font-size: 10px;
+          border-color: #444;
+          text-align: right;
+        }
+        #projects {
+          border-top-left-radius: 4px;
+          text-align: left;
+          display: inline-block;
+          background-color: rgba(255, 255, 255, 0.8);
+          font-size: 12px;
+          padding: 3px;
+        }
+        h1 {
+          font-size: 14px;
+          padding: 0px;
+          margin: 0px;
+          font-weight: normal;
+        }
+        #info {
+          border-top-left-radius: 4px;
+          background-color: rgba(200, 200, 200, 0.8);
+          font-size: 14px;
+          padding: 3px;
+        }
+        .list {
+          overflow:auto;margin:3px;padding:0px;
+        }
+        .list li { 
+          list-style: none; float: left; margin-left: 20px; 
+        }
+        .leaflet-container img { 
+          image-rendering: optimizeSpeed; 
+        } /* thanks chrismorgan */
+    </style>
+  </head>
+  <body style='background-color:#FFF;padding:0;margin:0;'>
+    <div id='map' style='height:100%;'></div>
+    <script>
+
+      // Create the basic tile layer
+      var layer_url = 'nntiles/{z}_{x}_-{y}.png'
+      var basicTiles = L.tileLayer(layer_url, {
+          maxZoom: 16,
+          minZoom: 9,
+          tms: true,
+          continuousWorld: true,
+          tileSize: 512,
+      });
+
+      var r_layer_url = 'nntiles/{z}_{x}_-{y}_r.png'
+      var rTiles = L.tileLayer(r_layer_url, {
+          maxZoom: 16,
+          minZoom: 9,
+          tms: true,
+          continuousWorld: true,
+          tileSize: 512,
+      });
+
+      // Create the map
+      var simpleX = L.CRS.Simple;
+      var map = L.map('map', {
+          crs: simpleX,
+          center: [7.396,7.815],
+          zoom: 16,
+          layers: [basicTiles]
+      });
+
+      var coinIcon = L.icon({
+             iconUrl: 'images/coin.png',
+             iconSize: [25,25]
+             });
+
+      
+      var coins = [];
+      for (var i = 0; i < coinlist.length; i++) {
+          var coin = coinlist[i];
+          coin[1] *= -1;
+          var cord = [(coin[1]-65024)/65536, (coin[0]-1)/65536];
+          coins.push(L.marker(cord, {icon: coinIcon}).bindPopup("Coin #"+i));
+      }
+      var coinMarkers = L.layerGroup(coins);
+
+      var tileLayers = {
+          "Passages": rTiles,
+          "Base": basicTiles,
+      };
+      var markerLayers = {
+          "Coins": coinMarkers
+      };
+
+      L.control.layers(tileLayers, markerLayers).addTo(map);
+
+    </script>
+  </body>
+</html>
